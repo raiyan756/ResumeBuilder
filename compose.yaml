@@ -1,0 +1,39 @@
+name: pm-circle-resume
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: resume_builder
+      POSTGRES_USER: resume
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-resume_local_dev}
+    volumes:
+      - resume_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resume -d resume_builder"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  backend:
+    build: ./resume BE
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__ResumeDb: Host=db;Database=resume_builder;Username=resume;Password=${POSTGRES_PASSWORD:-resume_local_dev}
+      Gemini__ApiKey: ${GEMINI_API_KEY:-}
+      Gemini__Model: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
+      Gemini__Mode: ${AI_MODE:-Auto}
+    ports:
+      - "127.0.0.1:${BE_PORT:-8088}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  frontend:
+    build: ./resume FE
+    ports:
+      - "127.0.0.1:${FE_PORT:-5173}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+volumes:
+  resume_data:

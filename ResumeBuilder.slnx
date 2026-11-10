@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/resume BE/">
+    <Project Path="resume BE/ResumeBuilder.Api/ResumeBuilder.Api.csproj" />
+    <Project Path="resume BE/ResumeBuilder.Checks/ResumeBuilder.Checks.csproj" />
+  </Folder>
+</Solution>
